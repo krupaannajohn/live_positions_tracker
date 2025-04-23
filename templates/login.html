@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+    <style>
+        body {
+            background-color: #000;
+            color: gold;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+    
+        form {
+            display: inline-block;
+            text-align: left;
+            background: #222;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;  /* Keep the box size consistent */
+        }
+    
+        label {
+            color: gold;
+            display: block;
+            margin-top: 10px;
+            font-size: 18px;  /* Increased font size */
+        }
+    
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid gold;
+            border-radius: 5px;
+            background: #333;
+            color: gold;
+            font-size: 16px;  /* Increased font size */
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid gold;
+            border-radius: 5px;
+            background: #333;
+            color: gold;
+            font-size: 16px;  /* Increased font size */
+        }
+    
+        input[type="submit"] {
+            background-color: gold;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;  /* Increased font size */
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    
+        input[type="submit"]:hover {
+            background-color: gold;
+        }
+    </style>
+    
+</head>
+<body>
+    <h1>HR Login</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="Name">Name:</label>
+        <input type="text" id="Name" name="Name" required>
+
+        <label for="Emp_ID">Employee ID:</label>
+        <input type="number" id="Emp_ID" name="Emp_ID" required>
+
+        <label for="Department">Department:</label>
+        <input type="text" id="Department" name="Department" required>
+
+        <input type="submit" value="Login">
+    </form>
+
+    <!-- Display error message if credentials are incorrect -->
+    {% for message in messages %}
+    <p style="color: red;">{{ message }}</p>
+    {% endfor %}
+</body>
+</html>
+

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Recruiter Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background: black;
+            color: gold;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .chart-container {
+            width: 60%;
+            max-width: 600px;
+            margin: auto;
+        }
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stakeholder Dashboard</h1>
+    <h2>Department: {{ department }}</h2>
+
+    <div class="chart-container">
+        <canvas id="barChartGrade"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="barChartStatus"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="pieChartType"></canvas>
+    </div>
+
+    <script>
+        let department = "{{ department|escapejs }}";  
+        //let department = "Finance & Accounts"; 
+        //if (!department || department === "None") { department = "all"; }
+        let barChartGrade, barChartStatus, pieChartType;
+
+        function initializeCharts() {
+            barChartGrade = new Chart(document.getElementById("barChartGrade"), {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'No. of Hires by Grade', backgroundColor: ['#FDDC5C','gold', '#B8860B',  '#DA9100', '#996515'], data: [] }] },
+                options: { responsive: true }
+            });
+
+            barChartStatus = new Chart(document.getElementById("barChartStatus"), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: "New Hire", backgroundColor: "gold", data: [] },
+                        { label: "Replacement", backgroundColor: "darkgoldenrod", data: [] }
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true }
+                    }
+                }
+            });
+
+            pieChartType = new Chart(document.getElementById("pieChartType"), {
+                type: 'pie',
+                data: { labels: [], datasets: [{ label: 'No. of Hires by Type', backgroundColor: ['gold', 'darkgoldenrod'], data: [] }] },
+                options: { responsive: true }
+            });
+        }
+
+        function updateDashboard() {
+            $.getJSON("/api/hiring_data/", function(data) {
+                console.log("Fetched data:", data);
+                let filteredData = data.filter(item => item.department.trim().toLowerCase() === department.trim().toLowerCase());
+                console.log("Filtered Data:", filteredData);
+
+                let gradeCounts = {}, typeCounts = {}, statusCounts = {};
+
+                filteredData.forEach(item => {
+                    if (item.grade) gradeCounts[item.grade] = (gradeCounts[item.grade] || 0) + 1;
+                    if (item.type_hire) typeCounts[item.type_hire] = (typeCounts[item.type_hire] || 0) + 1;
+
+                    let status = item.status;
+                    let hireType = item.type_hire; 
+
+                    if (!statusCounts[status]) {
+                        statusCounts[status] = { newHire: 0, replacement: 0 };
+                    }
+
+                    if (hireType === "New Hire") {
+                        statusCounts[status].newHire += 1;
+                    } else if (hireType === "Replacement") {
+                        statusCounts[status].replacement += 1;
+                    }
+                });
+
+                let statusLabels = Object.keys(statusCounts);
+                let newHireData = statusLabels.map(status => statusCounts[status].newHire);
+                let replacementData = statusLabels.map(status => statusCounts[status].replacement);
+
+                updateChart(barChartGrade, Object.keys(gradeCounts), Object.values(gradeCounts));
+                updateStackedChart(barChartStatus, statusLabels, newHireData, replacementData);
+                updateChart(pieChartType, Object.keys(typeCounts), Object.values(typeCounts));
+            });
+        }
+
+        function updateChart(chart, labels, data) {
+            if (chart) {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = data;
+                chart.update();
+            }
+        }
+
+        function updateStackedChart(chart, labels, newHireData, replacementData) {
+            if (chart) {
+                chart.data.labels = labels;
+                chart.data.datasets = [
+                    { label: "New Hire", backgroundColor: "gold", data: newHireData },
+                    { label: "Replacement", backgroundColor: "darkgoldenrod", data: replacementData }
+                ];
+                chart.update();
+            }
+        }
+
+        $(document).ready(function() {
+            initializeCharts();
+            updateDashboard();
+
+            setInterval(() => {
+                updateDashboard();
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

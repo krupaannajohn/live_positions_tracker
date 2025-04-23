@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>HR Metrics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script> <!-- Correct CanvasJS link -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+    <style>
+        /* Custom Styles */
+        body {
+        background: black;
+        font-family: Arial, sans-serif;
+        color: gold;
+        text-align: center;
+    }
+    .container {
+        background: rgb(52, 50, 50);
+        padding: 20px;
+        border-radius: 10px;
+        width: 50%;
+        margin: auto;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .metrics-table {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two equal columns */
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        text-align: left;
+        padding: 10px;
+    }
+    .metric-item {
+        background: rgba(255, 215, 0, 0.1); /* Light gold transparent */
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .metric-item b {
+        color: white;
+    }
+
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        #funnelChartContainer {
+            height: 300px;
+            width: 70%;
+        }
+        .navbar {
+        background-color: #000 !important;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        }
+        .content-wrapper {
+    padding-top: 70px; 
+}
+    </style>
+</head>
+<body>
+
+</style>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="/" style="color: gold;">V-GUARD</a>
+    <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="{% url 'hiring_form' %}">Enter New Indent</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'recruiter_dashboard' %}">Admin Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'hr_metrics_page' %}">HR Metrics</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'view_all_data' %}">View Data</a></li>
+    </ul>
+</nav>
+
+<div class="content-wrapper">
+    <div class="container">
+        <h2>HR Metrics Overview</h2>
+        <div class="metrics-table">
+            <div class="metric-item"><b>Total Vacancies:</b> <span id="total_vacancies"></span></div>
+            <div class="metric-item"><b>Total Offers:</b> <span id="total_offers"></span></div>
+            <div class="metric-item"><b>Average Time to Hire:</b> <span id="avg_time_to_hire"></span> days</div>
+            <div class="metric-item"><b>CVs Given:</b> <span id="cv_given"></span></div>
+            <div class="metric-item"><b>CV sets Shared:</b> <span id="cv_shared"></span></div>
+            <div class="metric-item"><b>CVs Shortlisted:</b> <span id="cv_shortlisted"></span></div>
+            <div class="metric-item"><b>Candidates Interviewed:</b> <span id="candidates_interviewed"></span></div>
+        </div>
+    </div>
+
+    <br></br>
+
+    
+    <label for="indentSelect" style="color:white;">Select Indent no:</label>
+    <select id="indentSelect" onchange="updateFunnelChart()">
+        <option value="">All Indents</option>
+    </select>
+    <div class="chart-container">
+        <div id="funnelChartContainer"></div>
+    </div>
+
+    <script>
+        fetch("/hr-metrics/")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("total_vacancies").innerText = data.total_vacancies;
+                document.getElementById("total_offers").innerText = data.total_offers;
+                document.getElementById("avg_time_to_hire").innerText = data.avg_time_to_hire;
+                document.getElementById("cv_given").innerText = data.cv_given;
+                document.getElementById("cv_shared").innerText = data.cv_shared;
+                document.getElementById("cv_shortlisted").innerText = data.cv_shortlisted;
+                document.getElementById("candidates_interviewed").innerText = data.candidates_interviewed;
+            })
+            async function populateIndentDropdown() {
+            const res = await fetch("/get-indents/");
+            const data = await res.json();
+            const select = document.getElementById("indentSelect");
+
+            data.indents.forEach(indent => {
+                const option = document.createElement("option");
+                option.value = indent;
+                option.text = indent;
+                select.appendChild(option);
+            });
+        }
+
+        async function updateFunnelChart() {
+            try {
+                const indent = document.getElementById("indentSelect").value;
+                const url = indent ? `/get-funnel-data/?indent_no=${encodeURIComponent(indent)}` : "/get-funnel-data/";
+                const response = await fetch(url);
+                const data = await response.json();
+
+                console.log("Fetched Funnel Data:", data);
+
+                if (!data.funnel_data || data.funnel_data.length === 0) {
+                    document.getElementById("funnelChartContainer").innerHTML = "<p style='color: white;'>No Data Available</p>";
+                    return;
+                }
+
+                document.getElementById("funnelChartContainer").innerHTML = "";
+
+                var chart = new CanvasJS.Chart("funnelChartContainer", {
+                    animationEnabled: true,
+                    theme: "dark2",
+                    backgroundColor: "black",
+                    title: {
+                        text: `Recruitment Funnel${indent ? ' - ' + indent : ''}`,
+                        fontColor: "gold",
+                        fontSize: 24
+                    },
+                    data: [{
+                        type: "funnel",
+                        indexLabelPlacement: "inside",
+                        indexLabelFontColor: "white",
+                        toolTipContent: "<b>{label}</b>: {y}",
+                        indexLabel: "{label} ({y})",
+                        dataPoints: data.funnel_data.map(point => ({
+                            label: point.label,
+                            y: point.y,
+                            color: point.color
+                        }))
+                    }]
+                });
+
+                setTimeout(() => {
+                    chart.render();
+                }, 500);
+
+            } catch (error) {
+                console.error("Error updating funnel chart:", error);
+            }
+        }
+
+        // Initial Load
+        window.onload = async () => {
+            await populateIndentDropdown();
+            updateFunnelChart();
+            setInterval(updateFunnelChart, 30000); // auto refresh every 30s
+        };
+
+    </script>
+
+<h4>View Gantt Chart by Indent No:</h4>
+
+<select id="ganttindentSelect">
+    <option value="" disabled selected>Select an indent</option>
+    {% for indent in all_indents %}
+        <option value="{{ indent.indent_no }}">{{ indent.indent_no }}</option>
+    {% endfor %}
+</select>
+
+<div id="ganttChart" style="margin-top: 20px;"></div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    document.getElementById('ganttindentSelect').addEventListener('change', function () {
+        const indentNo = this.value;
+        if (indentNo) {
+            fetch(`/api/gantt/${indentNo}/`)
+                .then(response => response.json())
+                .then(data => {
+
+                    const layout = {
+                    title: {
+                        text: `Hiring Timeline for Indent: ${indentNo}`,
+                        font: { color: 'gold' }
+                    },
+                    plot_bgcolor: 'black',
+                    paper_bgcolor: 'black',
+                    font: { color: 'white' },
+                    xaxis: {
+                        type: 'date',
+                        title: {
+                            text: 'Timeline',
+                            font: { color: 'white' }
+                        },
+                        gridcolor: 'gray',
+                        tickfont: { color: 'white' }
+                    },
+                    yaxis: {
+                        automargin: true,
+                        autorange: 'reversed',
+                        tickfont: { color: 'white' }
+                    }
+                };
+
+                const chartData = [{
+                    type: 'bar',
+                    orientation: 'h',
+                    x: data.map(d => new Date(d.Finish).getTime() - new Date(d.Start).getTime()),
+                    y: data.map(d => d.Task),
+                    base: data.map(d => new Date(d.Start).getTime()),
+                    text: data.map(d => d.Resource),
+                    hovertext: data.map(d =>
+                        `${d.Task}<br>Start: ${d.Start}<br>Finish: ${d.Finish}`
+                    ),
+                    marker: { color: 'gold' }  
+                }];
+
+                Plotly.newPlot('ganttChart', chartData, layout, { responsive: true });
+
+                                });
+                        }
+                    });
+</script>
+</div>
+</body>
+</html>

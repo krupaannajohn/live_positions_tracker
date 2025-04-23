@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Viewing All Data</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #000;
+            color: #FFD700;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            text-align: left;
+            width: 95%;
+            margin: 10px auto 20px auto;
+        }
+
+        .button-container button {
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-container button:hover {
+            background-color: #e6c200;
+        }
+
+
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 95%;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        th, td {
+            border: 1px solid #FFD700;
+            padding: 10px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #222;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #333;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #444;
+        }
+
+        tr:hover {
+            background-color: #555;
+            color: #FFD700;
+        }
+
+        .no-data {
+            color: #bbb;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        @media (max-width: 600px) {
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 5px;
+            }
+        }
+
+        .navbar {
+        background-color: #000 !important;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        }
+
+        .content-wrapper {
+    padding-top: 70px; /* Match the navbar height */
+}
+
+input::placeholder {
+  color: white !important;
+  opacity: 1; 
+}
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="/" style="color: gold;">V-GUARD</a>
+        <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" href="{% url 'hiring_form' %}">Enter New Indent</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'recruiter_dashboard' %}">Admin Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'hr_metrics_page' %}">HR Metrics</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'view_all_data' %}">View Data</a></li>
+        </ul>
+    </nav>
+<div class="content-wrapper">
+    <h1 style="text-align:center;">Recruitment Tracker</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Indent No</th>
+                <th>Department</th>
+                <th>Vacancy Title</th>
+                <th>Recruiter</th>
+                <th>Source</th>
+                <th>Location</th>
+                <th>Place of Posting</th>
+                <th>Number of Vacancies</th>
+                <th>Grade</th>
+                <th>Type of Hire</th>
+                <th>Date Request was Received</th>
+                <th>Date of Deltek Post</th>
+                <th>Date when Round1 CVs sent</th>
+                <th>Date of first Revert</th>
+                <th>Date of Candidate Finalization</th>
+                <th>Number of CVs given</th>
+                <th>Number of CV sets shared</th>
+                <th>Number of CVs shortlisted</th>
+                <th>Number of Candidates Interviewed</th>
+                <th>Number of Candidates in Final Round</th>
+                <th>Number of offer letters</th>
+                <th>Status</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in form_entries %}
+            <tr>
+                <td>{{ entry.id }}</td>
+                <td>{{ entry.indent_no }}</td>
+                <td>{{ entry.department }}</td>
+                <td>{{ entry.vacancy_title }}</td>
+                <td>{{ entry.recruiter }}</td>
+                <td>{{ entry.source }}</td>
+                <td>{{ entry.location }}</td>
+                <td>{{ entry.place_of_posting }}</td>
+                <td>{{ entry.no_of_vacancies }}</td>
+                <td>{{ entry.grade }}</td>
+                <td>{{ entry.type_hire }}</td>
+                <td>{{ entry.date_req_received }}</td>
+                <td>{{ entry.date_deltek_post }}</td>
+                <td>{{ entry.date_round1_cvsent }}</td>
+                <td>{{ entry.date_revert1 }}</td>
+                <td>{{ entry.date_candidate_finalised }}</td>
+                <td>{{ entry.cv_given }}</td>
+                <td>{{ entry.cv_shared }}</td>
+                <td>{{ entry.cv_shortlisted }}</td>
+                <td>{{ entry.candidates_interviewed }}</td>
+                <td>{{ entry.candidates_finalround }}</td>
+                <td>{{ entry.no_of_offers }}</td>
+                <td>{{ entry.status }}</td>
+                <td>{{ entry.comments }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="button-container">
+        <a href="{% url 'export_excel' %}">
+            <button>Export to Excel</button>
+        </a>
+    </div>
+
+    <!-- Requisition Funnel Section -->
+<div class="container mt-5" style="color: white;">
+    <h2 style="color: gold;">Indent-wise Funnel</h2>
+    <input list="requisition_list" id="indent_no" name="indent_no" class="form-control mb-2" style="background-color: black; color: white; border: 2px solid gold;" placeholder="Enter Indent Number" required>
+    <datalist id="requisition_list">
+        {% for req in requisitions %}
+            <option value="{{ req.indent_no }}">{{ req.indent_no }} : {{ req.vacancy_title }}</option>
+        {% endfor %}
+    </datalist>   
+    <button onclick="fetchRequisitionMetrics()" class="btn btn-warning mt-2">Get Metrics</button>
+
+    <div id="metricsAndChart" style="display:none; margin-top: 30px;">
+        <div id="metricsDisplay" style="text-align: left; padding: 10px;"></div>
+        <div id="funnelChartContainer" style="height: 400px; margin-top: 20px;"></div>
+    </div>
+</div>
+
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script>
+    function fetchRequisitionMetrics() {
+        const inputValue = document.getElementById("indent_no").value;
+        if (!inputValue) {
+            alert("Please enter a valid indent number.");
+            return;
+        }
+
+        fetch(`/get-hr-metrics-per-requisition/?indent_no=${encodeURIComponent(inputValue)}`)
+            .then(response => response.json())
+            .then(data => {
+                const funnelData = data.funnel_data;
+                if (!funnelData || funnelData.length === 0) {
+                    alert("No funnel data found for this requisition.");
+                    return;
+                }
+
+                document.getElementById("metricsAndChart").style.display = "block";
+                // Update metrics display
+                document.getElementById("metricsDisplay").innerHTML = `
+                    <h4 style="color: gold;">Recruitment Funnel for Indent No: ${inputValue}</h4>
+                    <ul style="list-style: none; padding-left: 0;">
+                        <li><b>More CVs required:</b> ${funnelData[0].y}</li>
+                        <li><b>CVs to be shared:</b> ${funnelData[1].y}</li>
+                        <li><b>CVs shared:</b> ${funnelData[2].y}</li>
+                        <li><b>Interview:</b> ${funnelData[3].y}</li>
+                        <li><b>On Hold:</b> ${funnelData[4].y}</li>
+                        <li><b>Candidate Finalized:</b> ${funnelData[5].y}</li>
+                        <li><b>Hires:</b> ${funnelData[6].y}</li>
+                        <li><b>On Hold (New Hire):</b> ${funnelData[7].y}</li>
+                    </ul>
+                `;
+
+                updateFunnelChart(inputValue, funnelData);
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                alert("Could not fetch requisition data.");
+            });
+    }
+
+    function updateFunnelChart(IndentNo, funnelData) {
+        try {
+            const container = document.getElementById("funnelChartContainer");
+
+            if (!funnelData || funnelData.length === 0) {
+                container.innerHTML = "<p style='color: white;'>No funnel data available.</p>";
+                return;
+            }
+
+            // Cumulative logic: Each stage will include all prior stages, except for the "Hired" stage
+            let cumulativeData = [];
+            let cumulativeCount = 0;
+
+            // Loop to handle cumulative count for all stages except "Hired"
+            for (let i = 0; i < funnelData.length - 1; i++) {
+                cumulativeCount += funnelData[i].y;
+                cumulativeData.push({
+                    label: funnelData[i].label,
+                    y: cumulativeCount,  // Cumulative value
+                    color: funnelData[i].color
+                });
+            }
+
+            // "Hired" stage is not cumulative, it should show the exact count of hired candidates
+            cumulativeData.push({
+                label: funnelData[6].label,  // "Hired"
+                y: funnelData[6].y,         // Exact count
+                color: funnelData[6].color
+            });
+
+            container.innerHTML = ""; // Clear previous chart
+            const chart = new CanvasJS.Chart("funnelChartContainer", {
+                animationEnabled: true,
+                theme: "dark2",
+                backgroundColor: "#222",
+                title: {
+                    text: `Cumulative Recruitment Funnel for Indent ${IndentNo}`,
+                    fontColor: "gold"
+                },
+                data: [{
+                    type: "funnel",
+                    indexLabelPlacement: "inside",
+                    indexLabelFontColor: "white",
+                    toolTipContent: "<b>{label}</b>: {y}",
+                    indexLabel: "{label} ({y})",
+                    dataPoints: cumulativeData.map(point => ({
+                        label: point.label,
+                        y: point.y,
+                        color: point.color
+                    }))
+                }]
+            });
+
+            chart.render();
+        } catch (err) {
+            console.error("Chart error:", err);
+        }
+    }
+</script>
+
+
+</div>
+
+</body>
+</html>

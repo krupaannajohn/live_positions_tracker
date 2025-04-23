@@ -1,0 +1,13 @@
+--only-binary=:all:
+--extra-index-url https://pypi.org/simple
+
+Django==4.2.5
+djangorestframework==3.15.1
+python-dotenv==1.0.1
+numpy
+pandas
+requests==2.31.0
+gunicorn
+dj-database-url
+python-decouple
+psycopg2-binary

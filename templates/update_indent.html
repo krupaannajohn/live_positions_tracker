@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Indent</title>
+    <style>
+        /* Background Styling */
+        body {
+            background: linear-gradient(135deg, black, gold);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+            color: white;
+        }
+
+        /* Main Container */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
+            align-items: center;
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            text-align: center;
+        }
+
+        /* Form Section */
+        .form-container {
+            width: 100%;
+            color: black;
+        }
+
+        /* Header Styling */
+        h2 {
+            font-weight: bold;
+            color: black;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Form Fields */
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        /* Submit Button */
+        .form-btn-submit {
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            background: black;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .form-btn-submit:hover {
+            background: gold;
+            color: black;
+        }
+
+        /* Cancel Link */
+        .cancel-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: black;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .cancel-link:hover {
+            color: gold;
+        }
+
+        /* Image Styling */
+        .image-container {
+            margin-top: 20px; /* Add spacing after cancel button */
+        }
+
+        .image-container img {
+            width: 100%;
+            max-width: 250px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <!-- Form Section -->
+        <div class="form-container">
+            {% block content %}
+                <h2>Update Indent No: {{ indent_no }}</h2>
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="form-btn-submit">Update</button>
+                </form>
+                <a href="{% url 'recruiter' %}" class="cancel-link">Cancel</a>
+            {% endblock %}
+        </div>
+
+        <!-- Image Below Cancel Button -->
+        <div class="image-container">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDXRr6p4sZXc9alHtaCq6w6zopUdcuKWbZVA&s" alt="Hiring Image">
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Indent Gantt Chart</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h2>Gantt Chart for Indent: {{ indent_no }}</h2>
+    <div id="gantt"></div>
+
+    <script>
+        fetch("/api/gantt/{{ indent_no }}/")
+            .then(response => response.json())
+            .then(data => {
+                const chartData = [{
+                    type: 'bar',
+                    orientation: 'h',
+                    x: data.map(d => new Date(d.Finish).getTime() - new Date(d.Start).getTime()),
+                    y: data.map(d => d.Task),
+                    base: data.map(d => new Date(d.Start).getTime()),
+                    text: data.map(d => d.Resource),
+                    marker: { color: '#4E79A7' },
+                    hovertext: data.map(d =>
+                        `${d.Task}<br>Start: ${d.Start}<br>Finish: ${d.Finish}`
+                    )
+                }];
+
+                Plotly.newPlot('gantt', chartData, {
+                    title: `Hiring Timeline`,
+                    xaxis: { type: 'date', title: 'Timeline' },
+                    yaxis: { automargin: true }
+                });
+            });
+    </script>
+</body>
+</html>
