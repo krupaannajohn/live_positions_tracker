@@ -9,25 +9,31 @@ class HiringData(models.Model):
     
     # Corrected department choices format
     DEPARTMENT_CHOICES = [
-        ('Finance & Accounts', 'Finance & Accounts'),
-        ('Appliance Division', 'Appliance Division'),
-        ('Brand & Communications', 'Brand & Communications'),
-        ('Category Strategy and Go to Market', 'Category Strategy and Go to Market'),
-        ('Civil & MEP', 'Civil & MEP'),
-        ('Corporate Manufacturing Services', 'Corporate Manufacturing Services'),
-        ('Customer Service', 'Customer Service'),
-        ('Digital & Emerging Channels', 'Digital & Emerging Channels'),
-        ('Electronics Division', 'Electronics Division'),
-        ('Human Resources', 'Human Resources'),
-        ('Marketing', 'Marketing'),
-        ('Mechanical & Electronics Division', 'Mechanical & Electronics Division'),
-        ('Quality', 'Quality'),
-        ('R&D (Electronics Divn)', 'R&D (Electronics Divn)'),
-        ('Strategy', 'Strategy'),
-        ('Sunflame', 'Sunflame'),
-        ('Supply Chain Management', 'Supply Chain Management'),
-        ('Systems', 'Systems'),
-        ('Wires & Cables Divn', 'Wires & Cables Divn'),
+        ("Administration", "Administration"),
+        ("Appliance Division", "Appliance Division"),
+        ("Brand & Communications", "Brand & Communications"),
+        ("Category Strategy & NBI", "Category Strategy & NBI"),
+        ("Civil & MEP", "Civil & MEP"),
+        ("Corporate Manufacturing Services", "Corporate Manufacturing Services"),
+        ("Customer Service", "Customer Service"),
+        ("ECDI Service", "ECDI Service"),
+        ("Electromechanical Division", "Electromechanical Division"),
+        ("Electronics Division", "Electronics Division"),
+        ("Emerging Channels & Digital Initiatives", "Emerging Channels & Digital Initiatives"),
+        ("Finance & Accounts", "Finance & Accounts"),
+        ("Go To Market", "Go To Market"),
+        ("Human Resources", "Human Resources"),
+        ("Industrial Design", "Industrial Design"),
+        ("IT & Systems", "IT & Systems"),
+        ("Legal", "Legal"),
+        ("Marketing", "Marketing"),
+        ("Mechanical & Electrical Division", "Mechanical & Electrical Division"),
+        ("New Product Development", "New Product Development"),
+        ("Quality", "Quality"),
+        ("R&D (Electronics Division)", "R&D (Electronics Division)"), 
+        ("Strategy", "Strategy"),
+        ("Supply Chain Management", "Supply Chain Management"),
+        ("Wires & Cables Division", "Wires & Cables Division")
     ]
     department = models.CharField(max_length=255, choices=DEPARTMENT_CHOICES)
 
@@ -38,7 +44,6 @@ class HiringData(models.Model):
         ('Naukri', 'Naukri'),
         ('Linkedin', 'Linkedin'),
         ('Employee Referrals', 'Employee Referrals'),
-        ('IIM Jobs', 'IIM Jobs'),
         ('Others', 'Others'),
     ]
     source = models.CharField(max_length=255, choices=SOURCE_CHOICES, blank = True, null = True)
