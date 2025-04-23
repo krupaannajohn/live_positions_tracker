@@ -180,33 +180,6 @@ import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import HiringData
-
-"""def business_stakeholder_login(request): 
-    if request.method == 'POST':
-        # Read inputs
-        name = request.POST.get('Name', '').strip().lower()
-        emp_id = request.POST.get('Emp_ID', '').strip()
-        department = request.POST.get('Department', '').strip().lower()
-
-        # Validate Employee ID
-        try:
-            emp_id = int(emp_id)
-        except ValueError:
-            messages.error(request, 'Invalid Employee ID format.')
-            return render(request, 'business_stakeholder.html')
-
-        # Read Excel file
-        df = pd.read_excel('excel_data/credentials_business.xlsx')
-
-        # Check credentials
-        if not df[(df['Name'].str.lower() == name) & (df['Emp_ID'] == emp_id) & (df['Department'].str.lower() == department)].empty:
-            request.session['department'] = department  # Store session data
-            return render(request,'business_dashboard.html')  # Redirect to dashboard
-        else:
-            messages.error(request, 'Invalid credentials.')
-
-    return render(request, 'business_stakeholder.html')"""
-
 from django.shortcuts import render, redirect
 from django.contrib import messages
 import pandas as pd
@@ -239,17 +212,6 @@ def business_stakeholder_login(request):
 
     return render(request, 'business_stakeholder.html')  # Show login page if GET request or invalid login
 
-
-"""def business_dashboard(request):
-    department = request.session.get('department')
-    if not department:
-        return redirect('business_stakeholder_login')
-    
-    # Fetch hiring data
-    hiring_data = list(HiringData.objects.filter(department=department).values())
-
-    return render(request, "business_dashboard.html", {"hiring_data": hiring_data, "department": department})"""
-
 def business_dashboard(request):
     department = request.session.get('department')
 
@@ -280,52 +242,7 @@ def hiring_data_api(request, department=None):
 # HR Metrics
 from django.http import JsonResponse
 from django.db.models import Sum, Count, Avg, F, ExpressionWrapper, fields
-from .models import HiringData  # Assuming this is your model
-
-"""def hr_metrics(request):
-    total_hires = HiringData.objects.aggregate(total_hires=Sum("no_of_hires"))["total_hires"] or 0
-    total_offers = HiringData.objects.aggregate(total_offers=Sum("no_of_offers"))["total_offers"] or 0
-
-    hiring_success_rate = (total_hires / total_offers) * 100 if total_offers > 0 else 0
-
-    # Average time to hire (date_req_received → date_candidate_finalised)
-    avg_time_to_hire = HiringData.objects.exclude(date_candidate_finalised=None).annotate(
-        hiring_days=ExpressionWrapper(
-            F("date_candidate_finalised") - F("date_req_received"),
-            output_field=fields.DurationField()
-        )
-    ).aggregate(avg_days=Avg("hiring_days"))["avg_days"]
-
-    avg_time_to_hire = avg_time_to_hire.days if avg_time_to_hire else 0  # Convert timedelta to days
-
-    # Offer Acceptance Rate
-    offer_acceptance_rate = (total_hires / total_offers) * 100 if total_offers > 0 else 0
-
-    # Conversion Rates
-    cv_given = HiringData.objects.aggregate(total=Sum("cv_given"))["total"] or 0
-    cv_shared = HiringData.objects.aggregate(total=Sum("cv_shared"))["total"] or 0
-    cv_shortlisted = HiringData.objects.aggregate(total=Sum("cv_shortlisted"))["total"] or 0
-    interviewed = HiringData.objects.aggregate(total=Sum("candidates_interviewed"))["total"] or 0
-    final_round = HiringData.objects.aggregate(total=Sum("candidates_finalround"))["total"] or 0
-
-    return JsonResponse({
-        "total_hires": total_hires,
-        "total_offers": total_offers,
-        "hiring_success_rate": round(hiring_success_rate, 2),
-        "avg_time_to_hire": avg_time_to_hire,
-        "offer_acceptance_rate": round(offer_acceptance_rate, 2),
-        "cv_given": cv_given,
-        "cv_shared": cv_shared,
-        "cv_shortlisted": cv_shortlisted,
-        "interviewed": interviewed,
-        "final_round": final_round,
-    })
-
-def hr_metrics_page(request):
-    return render(request, "hr_metrics.html")
-
-"""
-
+from .models import HiringData  
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Sum, Avg, ExpressionWrapper, F, fields
@@ -333,7 +250,7 @@ from .models import HiringData
 
 from django.http import JsonResponse
 from django.db.models import Sum, Avg, F
-from .models import HiringData  # Make sure this model exists
+from .models import HiringData  
 
 def hr_metrics(request):
     total_vacancies = HiringData.objects.aggregate(total_vacancies=Sum("no_of_vacancies"))["total_vacancies"] or 0
@@ -369,91 +286,6 @@ def hr_metrics_page(request):
 # Recruitment Funnel
 from django.http import JsonResponse
 from collections import Counter
-
-"""def get_funnel_data(request):
-    funnel_order = [
-    "More CVs required",
-    "CVs to be shared",
-    "CVs shared",
-    "Interview",
-    "Candidate Finalized",
-    "Hired",
-    "On Hold (New Hire)",
-    "On Hold"
-]
-    
-    # Fetch counts of each status
-    funnel_counts = {status: HiringData.objects.filter(status=status).count() for status in funnel_order}
-
-    # Prepare data in correct order
-    funnel_data = [{"label": status, "y": funnel_counts[status]} for status in funnel_order if funnel_counts[status] > 0]
-
-    return JsonResponse({"funnel_data": funnel_data})
-"""
-"""def get_funnel_data(request):
-    funnel_order = [
-        "More CVs required",
-        "CVs to be shared",
-        "CVs shared",
-        "Interview",
-        "On Hold",
-        "Candidate Finalized",
-        "Hired",
-        "On Hold (New Hire)",
-    ]
-
-    # Step 1: Fetch raw counts
-    funnel_counts = {status: HiringData.objects.filter(status=status).count() for status in funnel_order}
-
-    # Step 2: Make cumulative values (top-down)
-    cumulative_counts = []
-    cumulative_total = 0
-    for status in funnel_order:
-        cumulative_total += funnel_counts.get(status, 0)
-        cumulative_counts.append({"label": status, "y": cumulative_total})
-    return JsonResponse({"funnel_data": cumulative_counts})
-
-def hr_metrics_dashboard(request):
-    return render(request, "hr-metrics.html")
-
-"""
-"""def get_funnel_data(request):
-    funnel_order = [
-        "More CVs required",
-        "CVs to be shared",
-        "CVs shared",
-        "Interview",
-        "On Hold",
-        "Candidate Finalized",
-        "Hired",
-        "On Hold (New Hire)"
-    ]
-
-    color_map = {
-        "More CVs required": "#FFD700",
-        "CVs to be shared": "#FFA500",
-        "CVs shared": "#FF8C00",
-        "Interview": "#00CED1",
-        "On Hold": "#808080",
-        "Candidate Finalized": "#7CFC00",
-        "Hired": "#228B22",
-        "On Hold (New Hire)": "#B22222"
-    }
-
-    funnel_counts = {status: HiringData.objects.filter(status=status).count() for status in funnel_order}
-
-    funnel_data = [
-        {
-            "label": status,
-            "y": funnel_counts.get(status, 0),
-            "color": color_map.get(status, "#FFFFFF")
-        }
-        for status in funnel_order
-    ]
-
-    # No reverse needed unless your charting library requires it
-    return JsonResponse({"funnel_data": funnel_data})
-    """
 
 from django.http import JsonResponse
 from .models import HiringData
